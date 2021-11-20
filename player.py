@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import random
+from math import inf
 
 from fishing_game_core.game_tree import Node
 from fishing_game_core.player_utils import PlayerController
@@ -59,11 +60,47 @@ class PlayerControllerMinimax(PlayerController):
         :return: either "stay", "left", "right", "up" or "down"
         :rtype: str
         """
-
+        
         # EDIT THIS METHOD TO RETURN BEST NEXT POSSIBLE MODE USING MINIMAX ###
 
         # NOTE: Don't forget to initialize the children of the current node
         #       with its compute_and_get_children() method!
 
-        random_move = random.randrange(5)
-        return ACTION_TO_STR[random_move]
+    #    random_move = random.randrange(5)
+     #   return ACTION_TO_STR[random_move]
+    state = initial_tree_node
+    
+    def minimax(state, self):
+        children = compute_and_get_children(state)
+        if not children:
+           return heuristic(state, self)
+        else:
+            if state.get_player() == 0:
+                bestPossible = -inf
+                for each child in children:
+                    child.set_player(0)
+                    v = minimax(child, 1)
+                    bestPossible = max(bestPossible, v)
+                return bestPossible
+            else:
+                bestPossible = inf
+                for each child in children:
+                    child.set_player(0)
+                    v = minimax(child, 1)
+                    bestPossible = max(bestPossible, v)
+                return bestPossible
+
+
+    
+    def heuristic(state, self):
+        scores = state.get_player_scores()
+        p1 = scores[0]
+        p2 = scores[1]
+        return p1 - p2
+
+    #def alphabeta():
+        
+
+    
+
+
