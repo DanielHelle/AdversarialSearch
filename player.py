@@ -52,6 +52,8 @@ class PlayerControllerMinimax(PlayerController):
             self.sender({"action": best_move, "search_time": None})
 
     def search_best_next_move(self, initial_tree_node):
+        leftNode, rightNode, upNode, downNode, stayNode = initial_tree_node
+        leftNode.set
         """
         Use minimax (and extensions) to find best possible next move for player 0 (green boat)
         :param initial_tree_node: Initial game tree node
@@ -68,39 +70,52 @@ class PlayerControllerMinimax(PlayerController):
 
     #    random_move = random.randrange(5)
      #   return ACTION_TO_STR[random_move]
-    state = initial_tree_node
     
-    def minimax(state, self):
-        children = compute_and_get_children(state)
+
+
+    def minimax(self, node, player):
+        node.state.set_player(player)
+        children = node.compute_and_get_children()
         if not children:
-           return heuristic(state, self)
+           return self.heuristic(node.state)
         else:
-            if state.get_player() == 0:
+            if player == 0:
                 bestPossible = -inf
-                for each child in children:
-                    child.set_player(0)
-                    v = minimax(child, 1)
+                for child in children:
+                    v = self.minimax(child, 1)
                     bestPossible = max(bestPossible, v)
                 return bestPossible
             else:
                 bestPossible = inf
-                for each child in children:
-                    child.set_player(0)
-                    v = minimax(child, 1)
-                    bestPossible = max(bestPossible, v)
+                for child in children:
+                    v = self.minimax(child, 0)
+                    bestPossible = min(bestPossible, v)
                 return bestPossible
 
-
-    
-    def heuristic(state, self):
+    def heuristic(state):
         scores = state.get_player_scores()
         p1 = scores[0]
         p2 = scores[1]
         return p1 - p2
 
-    #def alphabeta():
-        
 
-    
-
-
+    def alphabeta(self, node, player, alpha, beta, depth):
+        node.state.set_player(player)
+        children = node.compute_and_get_children()
+        if not children or depth == 0:
+           v = self.heuristic(node.state)
+        elif player == 0:
+            v = -inf
+            for child in children:
+                v = max(v, self.alphabeta(child, 1, alpha, beta, depth-1))
+                alpha = max(alpha, v)
+                if(beta <= alpha): 
+                    break
+        else:
+            v = inf
+            for child in children:
+                v = min(v, self.alphabeta(child, 0, alpha, beta, depth-1))
+                beta = min(beta, v)
+                if(beta <= alpha):
+                    break
+        return v
