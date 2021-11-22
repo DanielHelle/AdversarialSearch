@@ -52,8 +52,15 @@ class PlayerControllerMinimax(PlayerController):
             self.sender({"action": best_move, "search_time": None})
 
     def search_best_next_move(self, initial_tree_node):
-        leftNode, rightNode, upNode, downNode, stayNode = initial_tree_node
-        leftNode.set
+        act_nodes = initial_tree_node.compute_and_get_children()
+        max_val = -inf
+        for i in range[5]:
+            a = self.alphabeta(act_nodes[i], 0, -inf, inf, 7)
+            if( a > max_val):
+                max_val = a
+                move = i
+
+        return ACTION_TO_STR[move]
         """
         Use minimax (and extensions) to find best possible next move for player 0 (green boat)
         :param initial_tree_node: Initial game tree node
@@ -100,15 +107,18 @@ class PlayerControllerMinimax(PlayerController):
 
 
     def alphabeta(self, node, player, alpha, beta, depth):
-        node.state.set_player(player)
+        '''node.state.set_player(player)'''
         children = node.compute_and_get_children()
         if not children or depth == 0:
            v = self.heuristic(node.state)
         elif player == 0:
             v = -inf
+            max_val = -inf
             for child in children:
                 v = max(v, self.alphabeta(child, 1, alpha, beta, depth-1))
                 alpha = max(alpha, v)
+                if alpha >= max_val:
+                    max_val = alpha
                 if(beta <= alpha): 
                     break
         else:
