@@ -54,8 +54,9 @@ class PlayerControllerMinimax(PlayerController):
     def search_best_next_move(self, initial_tree_node):
         act_nodes = initial_tree_node.compute_and_get_children()
         max_val = -inf
+        depth = 7
         for i in range(5):
-            a = self.alphabeta(act_nodes[i], 0, -inf, inf, 7)
+            a = self.alphabeta(act_nodes[i], 0, -inf, inf, depth)
             if( a > max_val):
                 max_val = a
                 move = i
