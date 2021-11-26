@@ -1,4 +1,4 @@
-k# Game tree for Fishing Derby
+# Game tree for Fishing Derby
 from itertools import product
 import numpy as np
 from fishing_game_core.shared import OBS_TO_MOVES, ACT_TO_MOVES

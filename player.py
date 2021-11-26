@@ -54,10 +54,11 @@ class PlayerControllerMinimax(PlayerController):
     def search_best_next_move(self, initial_tree_node):
         act_nodes = initial_tree_node.compute_and_get_children()
         max_val = -inf
-        depth = 7
+        depth = 3
         for i in range(5):
-            a = self.alphabeta(act_nodes[i], 0, -inf, inf, depth)
-            if( a > max_val):
+           # a = self.alphabeta(act_nodes[i], 0, -inf, inf, depth)
+           a = self.minimax(act_nodes[i],0)
+           if( a > max_val):
                 max_val = a
                 move = i
 
@@ -79,6 +80,52 @@ class PlayerControllerMinimax(PlayerController):
     #    random_move = random.randrange(5)
      #   return ACTION_TO_STR[random_move]
     
+    def manhattan(self,hookPos, fishPos):
+        xDist = abs(fishPos[0] - hookPos[0])
+        yDist = abs(fishPos[1] - hookPos[1])
+
+        x = min(xDist, 20 - xDist)
+
+        return x + yDist
+    
+    def heuristic(self,node):
+        p1_score = node.state.player_scores[0]
+        p2_score = node.state.player_scores[1]
+
+        tot = p1_score - p2_score
+        val = 0
+        while val <= len(node.state.fish_positions):
+            m_dist = self.manhattan(node.state.fish_positions[i], node.state.hook_positions[0])
+            if node.state.fish_score[i] > 0 and m_dist == 0:
+                return inf
+            val = max(node.state.fish_scores[i] * 10 * mat.exp(-distance))
+
+
+    def alphabeta(self, node, player, alpha, beta, depth):
+        '''node.state.set_player(player)'''
+        children = node.compute_and_get_children()
+        if len(children) == 0 or depth == 0:
+           v = self.heuristic(node)
+        elif player == 0:
+            v = -inf
+            max_val = -inf
+            for child in children:
+                v = max(v, self.alphabeta(child, 1, alpha, beta, depth-1))
+                alpha = max(alpha, v)
+                if alpha >= max_val:
+                    max_val = alpha
+                if(beta <= alpha): 
+                    break
+        else:
+            v = inf
+            for child in children:
+                v = min(v, self.alphabeta(child, 0, alpha, beta, depth-1))
+                beta = min(beta, v)
+                if(beta <= alpha):
+                    break
+        return v
+
+
 
 
     def minimax(self, node, player):
@@ -99,34 +146,3 @@ class PlayerControllerMinimax(PlayerController):
                     v = self.minimax(child, 0)
                     bestPossible = min(bestPossible, v)
                 return bestPossible
-
-    def heuristic(state):
-        scores = state.get_player_scores()
-        p1 = scores[0]
-        p2 = scores[1]
-        return p1 - p2
-
-
-    def alphabeta(self, node, player, alpha, beta, depth):
-        '''node.state.set_player(player)'''
-        children = node.compute_and_get_children()
-        if not children or depth == 0:
-           v = self.heuristic(node.state)
-        elif player == 0:
-            v = -inf
-            max_val = -inf
-            for child in children:
-                v = max(v, self.alphabeta(child, 1, alpha, beta, depth-1))
-                alpha = max(alpha, v)
-                if alpha >= max_val:
-                    max_val = alpha
-                if(beta <= alpha): 
-                    break
-        else:
-            v = inf
-            for child in children:
-                v = min(v, self.alphabeta(child, 0, alpha, beta, depth-1))
-                beta = min(beta, v)
-                if(beta <= alpha):
-                    break
-        return v
