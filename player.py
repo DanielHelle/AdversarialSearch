@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import math
 import random
 from math import inf
 
@@ -53,15 +54,19 @@ class PlayerControllerMinimax(PlayerController):
 
     def search_best_next_move(self, initial_tree_node):
         act_nodes = initial_tree_node.compute_and_get_children()
-        max_val = -inf
+        max_val = float('-inf')
         depth = 3
-        for i in range(5):
-           # a = self.alphabeta(act_nodes[i], 0, -inf, inf, depth)
-           a = self.minimax(act_nodes[i],0)
-           if( a > max_val):
-                max_val = a
-                move = i
-
+        found_move = False
+        if(len(act_nodes) >= 5):
+            for i in range(5):
+                a = self.alphabeta(act_nodes[i], 0, float('-inf'), float('inf'), depth)
+            
+                if( a > max_val):
+                    found_move = True
+                    max_val = a
+                    move = i
+        if(not found_move):
+            move = random.randint(0,4)
         return ACTION_TO_STR[move]
         """
         Use minimax (and extensions) to find best possible next move for player 0 (green boat)
@@ -89,16 +94,16 @@ class PlayerControllerMinimax(PlayerController):
         return x + yDist
     
     def heuristic(self,node):
-        p1_score = node.state.player_scores[0]
-        p2_score = node.state.player_scores[1]
+        total_score = node.state.player_scores[0] - node.state.player_scores[1]
 
-        tot = p1_score - p2_score
         val = 0
-        while val <= len(node.state.fish_positions):
-            m_dist = self.manhattan(node.state.fish_positions[i], node.state.hook_positions[0])
-            if node.state.fish_score[i] > 0 and m_dist == 0:
-                return inf
-            val = max(node.state.fish_scores[i] * 10 * mat.exp(-distance))
+        for key, value in node.state.fish_positions.items():
+            distance = self.manhattan(node.state.fish_positions[key], node.state.hook_positions[0])
+            if distance == 0 and node.state.fish_scores[key] > 0:
+                return float('inf')
+            val = max(val, node.state.fish_scores[key] * math.exp(-distance))
+
+        return 2 * total_score + val
 
 
     def alphabeta(self, node, player, alpha, beta, depth):
