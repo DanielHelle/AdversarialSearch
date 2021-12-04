@@ -57,14 +57,14 @@ class PlayerControllerMinimax(PlayerController):
         max_val = float('-inf')
         depth = 3
         found_move = False
-        if(len(act_nodes) >= 5):
-            for i in range(5):
-                a = self.alphabeta(act_nodes[i], 0, float('-inf'), float('inf'), depth)
-            
-                if( a > max_val):
-                    found_move = True
-                    max_val = a
-                    move = i
+
+        for i in range(len(act_nodes)):
+            a = self.alphabeta(act_nodes[i], 0, float('-inf'), float('inf'), depth)
+        
+            if( a > max_val):
+                found_move = True
+                max_val = a
+                move = i
         if(not found_move):
             move = random.randint(0,4)
         return ACTION_TO_STR[move]
