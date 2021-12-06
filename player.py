@@ -66,6 +66,7 @@ class PlayerControllerMinimax(PlayerController):
 
         return ACTION_TO_STR[opt_act]
 
+#Returns manhattan distance between hook and fish
     def manhattan(self,hookPos, fishPos):
         return abs(fishPos[0] - hookPos[0]) + abs(fishPos[1] - hookPos[1])
 
@@ -78,6 +79,7 @@ class PlayerControllerMinimax(PlayerController):
             val *= -1
         return val
 
+#Returns distance of closest fish to player
     def fish_player_dist(self, node, player):
         dist = []
         hooks = node.state.get_hook_positions()
@@ -86,7 +88,7 @@ class PlayerControllerMinimax(PlayerController):
         if(dist == []):
             return 0
         return min(dist)
-
+# min-max algorithm but with alpha beta pruning
     def alphabeta(self, node, player, alpha, beta, depth):
         '''node.state.set_player(player)'''
         children = node.compute_and_get_children()
@@ -113,7 +115,7 @@ class PlayerControllerMinimax(PlayerController):
 
 
 
-
+# simple min-max, not used in the program
     def minimax(self, node, player):
         node.state.set_player(player)
         children = node.compute_and_get_children()
