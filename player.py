@@ -53,64 +53,45 @@ class PlayerControllerMinimax(PlayerController):
             self.sender({"action": best_move, "search_time": None})
 
     def search_best_next_move(self, initial_tree_node):
+        
         act_nodes = initial_tree_node.compute_and_get_children()
-        max_val = float('-inf')
-        depth = 3
-        found_move = False
+        actions = []
+        for act in act_nodes:
+            actions.append(self.alphabeta(act, 0, -math.inf, math.inf, 2))
+        opt_act = random.randint(0,4)
+        m = max(actions)
+        for idx, val in enumerate(actions):
+            if(val == m):
+                opt_act = idx
 
-        for i in range(len(act_nodes)):
-            a = self.alphabeta(act_nodes[i], 0, float('-inf'), float('inf'), depth)
-        
-            if( a > max_val):
-                found_move = True
-                max_val = a
-                move = i
-        if(not found_move):
-            move = random.randint(0,4)
-        return ACTION_TO_STR[move]
-        """
-        Use minimax (and extensions) to find best possible next move for player 0 (green boat)
-        :param initial_tree_node: Initial game tree node
-        :type initial_tree_node: game_tree.Node
-            (see the Node class in game_tree.py for more information!)
-        :return: either "stay", "left", "right", "up" or "down"
-        :rtype: str
-        """
-        
-        # EDIT THIS METHOD TO RETURN BEST NEXT POSSIBLE MODE USING MINIMAX ###
+        return ACTION_TO_STR[opt_act]
 
-        # NOTE: Don't forget to initialize the children of the current node
-        #       with its compute_and_get_children() method!
-
-    #    random_move = random.randrange(5)
-     #   return ACTION_TO_STR[random_move]
-    
     def manhattan(self,hookPos, fishPos):
-        xDist = abs(fishPos[0] - hookPos[0])
-        yDist = abs(fishPos[1] - hookPos[1])
+        return abs(fishPos[0] - hookPos[0]) + abs(fishPos[1] - hookPos[1])
 
-        x = min(xDist, 20 - xDist)
+    def heuristic(self, node, player):
+        p0_points, p1_points = node.state.get_player_scores()
+        val = p0_points - p1_points
+        if player == 0:
+            val = val - self.fish_player_dist(node, player)
+        elif player == 1:
+            val *= -1
+        return val
 
-        return x + yDist
-    
-    def heuristic(self,node):
-        total_score = node.state.player_scores[0] - node.state.player_scores[1]
-
-        val = 0
-        for key, value in node.state.fish_positions.items():
-            distance = self.manhattan(node.state.fish_positions[key], node.state.hook_positions[0])
-            if distance == 0 and node.state.fish_scores[key] > 0:
-                return float('inf')
-            val = max(val, node.state.fish_scores[key] * math.exp(-distance))
-
-        return 2 * total_score + val
-
+    def fish_player_dist(self, node, player):
+        dist = []
+        hooks = node.state.get_hook_positions()
+        for fish in list(node.state.get_fish_positions().values()):
+            dist.append(self.manhattan(hooks[player], fish))
+        if(dist == []):
+            return 0
+        return min(dist)
 
     def alphabeta(self, node, player, alpha, beta, depth):
         '''node.state.set_player(player)'''
         children = node.compute_and_get_children()
         if len(children) == 0 or depth == 0:
-           v = self.heuristic(node)
+           v = self.heuristic(node, player)
         elif player == 0:
             v = -inf
             max_val = -inf
